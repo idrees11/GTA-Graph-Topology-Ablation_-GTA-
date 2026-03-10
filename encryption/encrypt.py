@@ -1,38 +1,63 @@
-import subprocess
 import os
+import subprocess
 
-SUBMISSION_DIR = "submissions"
-PUBLIC_KEY = "encryption/public_key.pem"
+# -----------------------
+# Paths
+# -----------------------
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+SUBMISSION_DIR = os.path.join(SCRIPT_DIR, "submissions")
+PUBLIC_KEY = os.path.join(os.path.dirname(SCRIPT_DIR), "encryption", "public_key.pem")
 
-ideal_csv = os.path.join(SUBMISSION_DIR, "ideal_submission.csv")
-pert_csv = os.path.join(SUBMISSION_DIR, "perturbed_submission.csv")
+# AES key path
+AES_KEY_PATH = os.path.join(SUBMISSION_DIR, "aes_key.hex")
+AES_KEY_ENC_PATH = os.path.join(SUBMISSION_DIR, "aes_key.enc")
 
-aes_key = os.path.join(SUBMISSION_DIR, "aes_key.hex")
-
-ideal_enc = os.path.join(SUBMISSION_DIR, "ideal_submission.enc")
-pert_enc = os.path.join(SUBMISSION_DIR, "perturbed_submission.enc")
-
-aes_enc = os.path.join(SUBMISSION_DIR, "aes_key.enc")
-
+# -----------------------
+# Step 1: Generate AES key
+# -----------------------
 print("Generating AES key...")
-subprocess.run(f"openssl rand -hex 32 > {aes_key}", shell=True)
-
-print("Encrypting ideal submission...")
-subprocess.run(
-    f"openssl enc -aes-256-cbc -pbkdf2 -in {ideal_csv} -out {ideal_enc} -pass file:{aes_key}",
-    shell=True
+result = subprocess.run(
+    ["openssl", "rand", "-hex", "32"], capture_output=True, text=True, check=True
 )
+aes_key = result.stdout.strip()
+with open(AES_KEY_PATH, "w") as f:
+    f.write(aes_key)
 
-print("Encrypting perturbed submission...")
-subprocess.run(
-    f"openssl enc -aes-256-cbc -pbkdf2 -in {pert_csv} -out {pert_enc} -pass file:{aes_key}",
-    shell=True
-)
+# -----------------------
+# Step 2: Encrypt all CSVs
+# -----------------------
+csv_files = [
+    f for f in os.listdir(SUBMISSION_DIR)
+    if f.endswith(".csv") and f != "sample_submission.csv"
+]
 
+for csv_file in csv_files:
+    input_path = os.path.join(SUBMISSION_DIR, csv_file)
+    output_path = os.path.splitext(input_path)[0] + ".enc"
+    
+    print(f"Encrypting {csv_file}...")
+    subprocess.run(
+        [
+            "openssl", "enc", "-aes-256-cbc", "-pbkdf2",
+            "-in", input_path,
+            "-out", output_path,
+            "-pass", f"file:{AES_KEY_PATH}"
+        ],
+        check=True
+    )
+
+# -----------------------
+# Step 3: Encrypt AES key with RSA public key
+# -----------------------
 print("Encrypting AES key with RSA...")
 subprocess.run(
-    f"openssl pkeyutl -encrypt -pubin -inkey {PUBLIC_KEY} -in {aes_key} -out {aes_enc}",
-    shell=True
+    [
+        "openssl", "pkeyutl", "-encrypt", "-pubin",
+        "-inkey", PUBLIC_KEY,
+        "-in", AES_KEY_PATH,
+        "-out", AES_KEY_ENC_PATH
+    ],
+    check=True
 )
 
-print("Encryption completed.")
+print("Encryption completed. All CSVs encrypted and AES key secured.")
