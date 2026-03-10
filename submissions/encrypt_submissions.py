@@ -9,11 +9,14 @@ if _repo_root not in sys.path:
 from encryption.encrypt import encrypt_file
 
 def encrypt_submissions():
-    SUBMISSION_DIR = "."
-    files = [f for f in os.listdir(SUBMISSION_DIR) if f.endswith(".csv") and f != "sample_submission.csv"]
+    # Use the correct submissions directory
+    SUBMISSION_DIR = _script_dir
+    files = [f for f in os.listdir(SUBMISSION_DIR) 
+             if f.endswith(".csv") and f != "sample_submission.csv"]
 
     for file in files:
-        encrypt_file(file)
+        full_path = os.path.join(SUBMISSION_DIR, file)
+        encrypt_file(full_path)
 
 
 if __name__ == '__main__':
