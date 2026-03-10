@@ -1,7 +1,5 @@
-
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
-
 
 private_key = rsa.generate_private_key(
     public_exponent=65537,
@@ -20,17 +18,9 @@ pem_public = public_key.public_bytes(
     format=serialization.PublicFormat.SubjectPublicKeyInfo
 )
 
+with open("private_key.pem", "wb") as f:
+    f.write(pem_private)
+with open("public_key.pem", "wb") as f:
+    f.write(pem_public)
 
-if __name__ == "__main__":
-    import os
-    if os.path.exists("private_key.pem") or os.path.exists("public_key.pem"):
-        print("Warning: Key files already exist. Overwriting them will cause loss of access to encrypted files.")
-        print("If this is intentional, please backup and delete existing 'private_key.pem' and 'public_key.pem' files before running this script again.")
-        exit(1)
-        
-    with open("private_key.pem", "wb") as f:
-        f.write(pem_private)
-    with open("public_key.pem", "wb") as f:
-        f.write(pem_public)
-
-    print("Keys generated!")
+print("Keys generated!")
