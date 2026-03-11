@@ -5,10 +5,13 @@ const LEADERBOARD_CONFIG = {
     primaryScoreField: 'validation_f1_score',
     fieldNames: {
         team_name: 'Team',
-        validation_accuracy: 'Validation Accuracy',
-        validation_f1_score: 'Validation F1 Score',
+        validation_f1_ideal: 'F1 Ideal',
+        validation_f1_perturbed: 'F1 Perturbed',
+        robustness_gap: 'Robustness Gap',
+        validation_accuracy_ideal: 'Accuracy Ideal',
+        validation_accuracy_perturbed: 'Accuracy Perturbed',
         timestamp: 'Submission Time',
-    },
+     },
     fieldFormatters: {
         timestamp: (value) => {
             try {
