@@ -1,7 +1,8 @@
 # scripts/leaderboard/update_leaderboard.py
 from pathlib import Path
 import pandas as pd
-from .calculate_scores import calculate_scores_pair
+
+from scripts.leaderboard.calculate_scores import calculate_scores_pair
 from scripts.encryption.decrypt import decrypt_file
 
 SUBMISSIONS_DIR = Path("submissions")
@@ -22,9 +23,9 @@ def get_leaderboard_data():
             print(f"Skipping {team_dir.name}: missing files")
             continue
 
-        # Decrypted paths
-        ideal_csv = team_dir / "ideal.csv"
-        pert_csv = team_dir / "perturbed.csv"
+        # Decrypted paths (updated names)
+        ideal_csv = team_dir / "ideal_submissions.csv"
+        pert_csv = team_dir / "perturbed_submission.csv"
 
         # Decrypt
         decrypt_file(ideal_enc, ideal_csv)
