@@ -17,7 +17,6 @@ from leaderboard.calculate_scores import calculate_scores
 SUBMISSIONS_DIR = repo_root / "submissions"
 LEADERBOARD_CSV = repo_root / "leaderboard/leaderboard.csv"
 
-
 def ensure_metadata(csv_file, team_name):
     """Automatically create metadata.json next to CSV if missing."""
     metadata_file = csv_file.parent / "metadata.json"
@@ -30,28 +29,20 @@ def ensure_metadata(csv_file, team_name):
         }
         with open(metadata_file, "w") as f:
             json.dump(metadata, f)
-        # Verify
-        if metadata_file.exists():
-            print(f"DEBUG: Successfully created {metadata_file.name}")
-        else:
-            print(f"WARNING: Failed to create {metadata_file.name}")
+        print(f"DEBUG: metadata.json successfully created at {metadata_file}")
     else:
         print(f"DEBUG: metadata.json already exists for {csv_file.name}")
-
 
 def get_leaderboard_data():
     leaderboard = []
 
-    # Debug: list submissions folder
     print(f"DEBUG: Repo root: {repo_root}")
     print(f"DEBUG: Looking for submissions in: {SUBMISSIONS_DIR}")
     if not SUBMISSIONS_DIR.exists():
         print("DEBUG: Submissions directory does not exist!")
         return leaderboard
-    else:
-        print("DEBUG: Found team folders:", [d.name for d in SUBMISSIONS_DIR.iterdir() if d.is_dir()])
+    print("DEBUG: Found team folders:", [d.name for d in SUBMISSIONS_DIR.iterdir() if d.is_dir()])
 
-    # Iterate over each team
     for team_dir in SUBMISSIONS_DIR.iterdir():
         if not team_dir.is_dir():
             continue
@@ -79,14 +70,6 @@ def get_leaderboard_data():
         # Ensure metadata exists before scoring
         ensure_metadata(ideal_csv, team_dir.name)
         ensure_metadata(pert_csv, team_dir.name)
-
-        # Verify metadata exists
-        if not (ideal_csv.parent / "metadata.json").exists():
-            print(f"ERROR: metadata.json missing for {ideal_csv.name}, skipping scoring")
-            continue
-        if not (pert_csv.parent / "metadata.json").exists():
-            print(f"ERROR: metadata.json missing for {pert_csv.name}, skipping scoring")
-            continue
 
         # Score ideal
         try:
@@ -116,7 +99,6 @@ def get_leaderboard_data():
             print(f"Error scoring {pert_csv}: {e}")
             continue
 
-        # Append to leaderboard
         leaderboard.append({
             "team_name": team_dir.name,
             "validation_f1_ideal": ideal_scores.get("validation_f1_score", 0),
@@ -125,7 +107,6 @@ def get_leaderboard_data():
         })
 
     return leaderboard
-
 
 def update_leaderboard_csv():
     leaderboard_data = get_leaderboard_data()
@@ -142,7 +123,6 @@ def update_leaderboard_csv():
     print(f"Updated leaderboard at {LEADERBOARD_CSV}")
     print("DEBUG: Leaderboard data:")
     print(df.to_dict(orient="records"))
-
 
 if __name__ == "__main__":
     update_leaderboard_csv()
