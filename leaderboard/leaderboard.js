@@ -1,11 +1,12 @@
 const LEADERBOARD_CONFIG = {
     csvPath: './leaderboard.csv',
-    sortBy: 'validation_f1_score',
-    primaryScoreField: 'validation_f1_score',
+    sortBy: 'validation_f1_ideal', // sort by ideal F1
+    primaryScoreField: 'validation_f1_ideal',
     fieldNames: {
         team_name: 'Team',
-        validation_accuracy: 'Validation Accuracy',
-        validation_f1_score: 'Validation F1 Score',
+        validation_f1_ideal: 'F1 Ideal',
+        validation_f1_perturbed: 'F1 Perturbed',
+        robustness_gap: 'Robustness Gap',
         timestamp: 'Submission Time',
     },
     fieldFormatters: {
@@ -25,8 +26,9 @@ const LEADERBOARD_CONFIG = {
                 return value;
             }
         },
-        validation_accuracy: (value) => (Number.isFinite(value) ? value.toFixed(6) : value),
-        validation_f1_score: (value) => (Number.isFinite(value) ? value.toFixed(6) : value),
+        validation_f1_ideal: (value) => (Number.isFinite(value) ? value.toFixed(6) : value),
+        validation_f1_perturbed: (value) => (Number.isFinite(value) ? value.toFixed(6) : value),
+        robustness_gap: (value) => (Number.isFinite(value) ? value.toFixed(6) : value),
     },
 };
 
@@ -143,9 +145,8 @@ class LeaderboardManager {
         headerRow.innerHTML = '<th class="rank">Rank</th>';
         columns.forEach((column) => {
             const th = document.createElement('th');
-            const displayName = this.getDisplayName(column);
+            th.textContent = this.getDisplayName(column);
             const fieldClass = this.getFieldClass(column);
-            th.textContent = displayName;
             if (fieldClass) th.className = fieldClass;
             headerRow.appendChild(th);
         });
@@ -154,7 +155,7 @@ class LeaderboardManager {
         this.data.forEach((entry, index) => {
             const rank = index + 1;
             const row = document.createElement('tr');
-            row.style.animationDelay = `${(index + 1) * 0.1}s`;
+            row.style.animationDelay = `${rank * 0.1}s`;
 
             const rankCell = document.createElement('td');
             rankCell.className = `rank ${this.getRankClass(rank)}`;
@@ -176,7 +177,7 @@ class LeaderboardManager {
 
         if (lastUpdated) {
             const now = new Date();
-            const formattedDate = now.toLocaleString('en-US', {
+            lastUpdated.textContent = `Last updated: ${now.toLocaleString('en-US', {
                 month: 'long',
                 day: 'numeric',
                 year: 'numeric',
@@ -184,8 +185,7 @@ class LeaderboardManager {
                 minute: '2-digit',
                 second: '2-digit',
                 hour12: false,
-            }).replace(',', ' at');
-            lastUpdated.textContent = `Last updated: ${formattedDate}`;
+            }).replace(',', ' at')}`;
         }
     }
 
@@ -323,7 +323,7 @@ function initGraphBackground() {
                         from: nodes[i],
                         to: nodes[j],
                         distance: distance,
-                        strength: 1 - (distance / connectionDistance),
+                        strength: 1 - distance / connectionDistance,
                     });
                 }
             }
@@ -373,7 +373,7 @@ function initGraphBackground() {
             const dy = node.y - mouseY;
             const distance = Math.sqrt(dx * dx + dy * dy);
             if (distance < 150 && distance > 0) {
-                const force = (150 - distance) / 150 * 0.01;
+                const force = ((150 - distance) / 150) * 0.01;
                 node.vx += (dx / distance) * force;
                 node.vy += (dy / distance) * force;
             }
