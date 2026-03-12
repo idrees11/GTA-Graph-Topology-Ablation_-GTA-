@@ -142,7 +142,7 @@ This will create ideal_submission.csv and perturbed_submission.csv in the submis
 
 Submissions must be encrypted and placed inside a folder named after your team.
 
-_Step 1:_ Prepare your submission files
+**Step 1:** Prepare your submission files
 
 Your CSV files must have the following format (example for 38 test graphs):
 
@@ -161,59 +161,66 @@ ideal_submission.csv – predictions on clean test graphs.
 
 perturbed_submission.csv – predictions on perturbed test graphs.
 
-**#Step 2: ** Encrypt your files
+**Step 2:** Encrypt your files
 
 From the project root, run the encryption script:
 
-bash
+```
 cd submissions
-python encrypt_submissions.py
+submissions/python encrypt_submissions.py
 cd ..
+```
 This script will:
 
-Look for ideal_submission.csv and perturbed_submission.csv in your team folder (e.g., submissions/MyTeam/).
+Look for ideal_submission.csv and perturbed_submission.csv in your team folder (e.g., submissions/<Team_Name>/).
 
-Encrypt them using the public key (encryption/public_key.pem).
+1.   Encrypt them using the public key (encryption/public_key.pem).
 
-Produce ideal.enc and perturbed.enc in the same folder.
+2.   Produce ideal.enc and perturbed.enc in the same folder (submissions/<Team_Name>/).
 
 Only the .enc files should be committed; the raw .csv files remain local (they are git‑ignored).
+Note: Please dont forget to create submisions/<Team_Name>/  (two *enc files will be placed here)
 
-Step 3: Commit and push
-Fork the repository.
+**Step 3:** Commit and push
 
-Create a folder submissions/<YourTeamName>/ and place the .enc files inside.
+1.   Fork the repository.
 
-Create a new branch, commit only the .enc files, and open a Pull Request (PR) against the main branch.
+2.   Create a folder submissions/<YourTeamName>/ and place the .enc files inside.
 
-Important:
+3.   Create a new branch, commit only the .enc files, and open a Pull Request (PR) against the main branch.
+
+
+**Important:**
 
 Do not commit any raw .csv files.
 
 Ensure your team folder name does not contain spaces.
 
-Step 4: Automatic evaluation
-Once the PR is opened, the automated workflow will:
+**Step 4:** Automatic evaluation
 
-Decrypt your files (using the organiser’s private key, stored as a secret).
+1.   Once the PR is opened, the automated workflow will:
 
-Compute F1 scores for both ideal and perturbed submissions.
+2.   Decrypt your files (using the organiser’s private key, stored as a secret).
 
-Calculate the robustness gap.
+3.   Compute F1 scores for both ideal and perturbed submissions.
 
-Update the leaderboard (only your best perturbed score is retained).
+4.   Calculate the robustness gap.
 
-The live leaderboard will reflect the new results within minutes.
+5.   Update the leaderboard (only your best perturbed score is retained).
 
+6.   The live leaderboard will reflect the new results within minutes.
 
+--------------------------
 📁 Repository Structure
+--------------------------
+```
 gnn-topology-ablation/
 │
-├── .github/                     # GitHub Actions workflows
-│   ├── scripts/                  # Helper scripts for evaluation
+├── .github/                       # GitHub Actions workflows
+│   ├── scripts/                   # Helper scripts for evaluation
 │   └── workflows/                 # CI/CD pipeline definition
 │
-├── data/                         # Dataset files
+├── data/                          # Dataset files
 │   └── MUTAG/
 │       ├── test.csv               # Test graph indices
 │       └── train.csv              # Training labels
@@ -253,21 +260,24 @@ gnn-topology-ablation/
 ├── README.md
 ├── leaderboard.md
 └── requirements.txt
+```
 
-
+-----------------------
 🔒 Security Guarantee
-Predictions are encrypted locally using a symmetric key, which is then encrypted with the organiser’s RSA public key.
+-----------------------
 
-Only the organiser (with the corresponding private key stored as a GitHub secret) can decrypt the submissions.
+1.   Predictions are encrypted locally using a symmetric key, which is then encrypted with the organiser’s RSA public key.
 
-Encrypted files are visible in the repository but completely unreadable without the private key.
+2.   Only the organiser (with the corresponding private key stored as a GitHub secret) can decrypt the submissions.
 
-This ensures blind evaluation – participants cannot see each other’s predictions, and the organiser cannot see them until after the submission deadline (if desired).
+3.   Encrypted files are visible in the repository but completely unreadable without the private key.
 
+4.   This ensures blind evaluation – participants cannot see each other’s predictions, and the organiser cannot see them until after the submission
+     deadline (if desired).
+     
+-------------
 📜 License
+------------
 This project is released under the MIT License. See the LICENSE file for details.
 
-Happy modeling! If you have any questions, please open an issue or contact the organisers.
-python -m venv venv
-source venv/bin/activate   # or `venv\Scripts\activate` on Windows
-pip install -r requirements.txt
+
