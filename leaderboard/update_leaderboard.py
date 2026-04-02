@@ -238,12 +238,46 @@ def update_leaderboard_csv():
         print("No submissions found")
         return
 
+    print(f"DEBUG: Collected {len(leaderboard_data)} entries")
+    print(f"DEBUG: Team names collected: {[entry['team_name'] for entry in leaderboard_data]}")
+    
     df = pd.DataFrame(leaderboard_data)
+    print(f"DEBUG: DataFrame shape before sorting: {df.shape}")
+    print(f"DEBUG: DataFrame contents before sorting:\n{df}")
+    
     df = df.sort_values(
         ["validation_f1_perturbed", "robustness_gap"], ascending=[False, True]
     ).reset_index(drop=True)
     df.insert(0, "rank", range(1, len(df) + 1))
-    df.to_csv(LEADERBOARD_CSV, index=False)
+    
+    print(f"DEBUG: DataFrame shape after sorting: {df.shape}")
+    print(f"DEBUG: Final DataFrame:\n{df}")
+    
+    # Ensure the docs directory exists
+    LEADERBOARD_CSV.parent.mkdir(parents=True, exist_ok=True)
+    print(f"DEBUG: Writing to {LEADERBOARD_CSV}")
+    
+    # Write with error handling
+    try:
+        df.to_csv(LEADERBOARD_CSV, index=False)
+        print(f"DEBUG: Successfully wrote to {LEADERBOARD_CSV}")
+        
+        # Verify the write
+        if LEADERBOARD_CSV.exists():
+            print(f"DEBUG: File size: {LEADERBOARD_CSV.stat().st_size} bytes")
+            # Read it back to verify
+            df_check = pd.read_csv(LEADERBOARD_CSV)
+            print(f"DEBUG: Verified CSV contains {len(df_check)} rows")
+            print(f"DEBUG: Teams in CSV: {df_check['team_name'].tolist()}")
+        else:
+            print(f"ERROR: File was not created at {LEADERBOARD_CSV}")
+            
+    except Exception as e:
+        print(f"ERROR writing to CSV: {e}")
+        import traceback
+        traceback.print_exc()
+        raise
+    
     print(f"Updated leaderboard at {LEADERBOARD_CSV}")
     print("DEBUG: Leaderboard data:")
     print(df.to_dict(orient="records"))
