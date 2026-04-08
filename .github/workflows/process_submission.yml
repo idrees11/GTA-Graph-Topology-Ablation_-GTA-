@@ -72,7 +72,7 @@ jobs:
           TEST_LABELS_CONTENT: ${{ secrets.TEST_LABELS_CSV }}
         run: |
           mkdir -p data
-          echo "$TEST_LABELS_CONTENT" > data/test_labels_hidden.csv
+          #echo "$TEST_LABELS_CONTENT" > data/test_labels_hidden.csv
           export TEST_LABELS_CSV=data/test_labels_hidden.csv
           python .github/scripts/process_submission.py 2>/dev/null  # Redirect stderr to hide DEBUG output
 
